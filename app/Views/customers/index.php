@@ -13,8 +13,15 @@
                 <p class="eyebrow">Customer records</p>
                 <h2>Registered customers</h2>
             </div>
-            <span class="record-count"><?= count($customers) ?> records</span>
+            <div class="table-tools">
+                <span class="record-count"><?= count($customers) ?> records</span>
+                <a class="button primary" href="<?= site_url('customers/new') ?>">Add customer</a>
+            </div>
         </div>
+
+        <?php if (session('notice')): ?>
+            <p class="notice" role="status"><?= esc(session('notice')) ?></p>
+        <?php endif; ?>
 
         <div class="table-card">
             <table>
@@ -26,6 +33,7 @@
                         <th scope="col">Type</th>
                         <th scope="col">Points</th>
                         <th scope="col">Status</th>
+                        <th scope="col">Action</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -42,8 +50,12 @@
                             <td data-label="Type"><span class="role-badge"><?= esc($customer['customer_type']) ?></span></td>
                             <td data-label="Points"><?= esc($customer['loyalty_points']) ?></td>
                             <td data-label="Status"><span class="status-badge <?= $customer['account_status'] === 'Active' ? 'is-active' : 'is-inactive' ?>"><?= esc($customer['account_status']) ?></span></td>
+                            <td data-label="Action"><a class="table-link" href="<?= site_url('customers/' . $customer['id'] . '/edit') ?>">Edit</a></td>
                         </tr>
                     <?php endforeach; ?>
+                    <?php if ($customers === []): ?>
+                        <tr><td colspan="7">No customers yet. Add the first one to get started.</td></tr>
+                    <?php endif; ?>
                 </tbody>
             </table>
         </div>
