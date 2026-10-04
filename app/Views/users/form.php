@@ -1,6 +1,6 @@
 <?php
 $editing = $user !== null;
-$errors = validation_errors();
+$errors = session('form_errors') ?? validation_errors();
 $action = $editing ? site_url('users/' . $user['id']) : site_url('users');
 ?>
 
@@ -63,6 +63,26 @@ $action = $editing ? site_url('users/' . $user['id']) : site_url('users');
                             <?php endforeach; ?>
                         </select>
                         <?php if (isset($errors['account_status'])): ?><p class="field-error"><?= esc($errors['account_status']) ?></p><?php endif; ?>
+                    </div>
+                </div>
+
+                <div class="password-section">
+                    <div class="password-heading">
+                        <h2><?= $editing ? 'Change password' : 'Set a password' ?></h2>
+                        <p><?= $editing ? 'Leave these fields blank to keep the current password.' : 'The new staff member will use this password to sign in.' ?></p>
+                    </div>
+                    <div class="form-grid">
+                        <div class="form-field">
+                            <label for="password"><?= $editing ? 'New password' : 'Password' ?><?= $editing ? '' : ' <span class="required-mark">*</span>' ?></label>
+                            <input id="password" name="password" type="password" autocomplete="new-password" minlength="12" maxlength="72" <?= $editing ? '' : 'required' ?>>
+                            <p class="field-help">At least 12 characters. Avoid using a shared or easy-to-guess password.</p>
+                            <?php if (isset($errors['password'])): ?><p class="field-error"><?= esc($errors['password']) ?></p><?php endif; ?>
+                        </div>
+                        <div class="form-field">
+                            <label for="confirm_password">Confirm password<?= $editing ? '' : ' <span class="required-mark">*</span>' ?></label>
+                            <input id="confirm_password" name="confirm_password" type="password" autocomplete="new-password" <?= $editing ? '' : 'required' ?>>
+                            <?php if (isset($errors['confirm_password'])): ?><p class="field-error"><?= esc($errors['confirm_password']) ?></p><?php endif; ?>
+                        </div>
                     </div>
                 </div>
 

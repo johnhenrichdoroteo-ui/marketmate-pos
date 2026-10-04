@@ -3,8 +3,8 @@
         <p class="eyebrow">About the project</p>
         <h1>Meet your business helper.</h1>
         <p class="lead">
-            MarketMate POS is a friendly sales-management project. It now displays
-            customer and staff accounts from a MySQL database using CodeIgniter 4.
+            MarketMate POS is a friendly sales-management project. Staff can sign in to
+            manage customer and user accounts stored in MySQL with CodeIgniter 4.
         </p>
     </div>
 </section>
@@ -14,15 +14,15 @@
         <article class="content-card">
             <h2>What we are building</h2>
             <p>
-                The application provides a landing page, an about page, a customer listing,
-                and a staff listing. Customer and user records are stored in MySQL.
+                The public pages introduce MarketMate. The staff workspace holds the
+                customer and user directories, along with forms to keep records updated.
             </p>
         </article>
         <article class="content-card">
             <h2>What it demonstrates</h2>
             <p>
-                Routes select a controller, models retrieve database records, and views
-                display the information on the customer and staff pages.
+                Routes connect controllers and views, while models work with the database.
+                A session and route filter keep account pages available to signed-in staff.
             </p>
         </article>
     </div>

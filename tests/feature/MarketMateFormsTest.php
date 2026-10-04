@@ -15,6 +15,7 @@ final class MarketMateFormsTest extends CIUnitTestCase
     use FeatureTestTrait;
 
     private BaseConnection $testDb;
+    private int $authUserId;
 
     protected function setUp(): void
     {
@@ -45,6 +46,15 @@ final class MarketMateFormsTest extends CIUnitTestCase
             created_at TEXT NOT NULL,
             avatar TEXT
         )');
+
+        $this->authUserId = (int) (new UserModel())->insert([
+            'username'       => 'test_admin',
+            'full_name'      => 'Test Admin',
+            'password_hash'  => password_hash('TestPassword123!', PASSWORD_DEFAULT),
+            'role'           => 'Admin',
+            'account_status' => 'Active',
+            'created_at'     => '2026-10-03 10:00:00',
+        ]);
     }
 
     protected function tearDown(): void
@@ -98,12 +108,15 @@ final class MarketMateFormsTest extends CIUnitTestCase
             'account_status' => 'Active',
             'password_hash'  => 'posted-hash',
             'avatar'         => 'posted-file.png',
+            'password'       => 'NewStaffPassword123!',
+            'confirm_password' => 'NewStaffPassword123!',
         ]);
         $userResponse->assertRedirect();
 
         $user = (new UserModel())->where('username', 'new_staff')->first();
         $this->assertNotNull($user);
-        $this->assertNull($user['password_hash']);
+        $this->assertNotSame('posted-hash', $user['password_hash']);
+        $this->assertTrue(password_verify('NewStaffPassword123!', $user['password_hash']));
         $this->assertNull($user['avatar']);
     }
 
@@ -155,7 +168,7 @@ final class MarketMateFormsTest extends CIUnitTestCase
             'email' => '', 'phone' => '', 'role' => 'Staff', 'account_status' => 'Active',
         ]);
         $duplicate->assertRedirect();
-        $this->assertSame(2, $model->countAllResults());
+        $this->assertSame(3, $model->countAllResults());
 
         $edit = $this->postForm("/users/{$secondId}", [
             'username' => 'second_user', 'full_name' => 'Updated User',
@@ -164,14 +177,58 @@ final class MarketMateFormsTest extends CIUnitTestCase
 
         $edit->assertRedirect();
         $this->assertSame('Updated User', $model->find($secondId)['full_name']);
-        $this->assertSame(2, $model->countAllResults());
+        $this->assertSame(3, $model->countAllResults());
         $this->assertNotSame($firstId, $secondId);
+    }
+
+    public function testUserEditCanChangePasswordButDoesNotExposeItInFlashData(): void
+    {
+        $model = new UserModel();
+        $userId = $model->insert([
+            'username'       => 'cashier_test',
+            'full_name'      => 'Cashier Test',
+            'password_hash'  => password_hash('OldPassword123!', PASSWORD_DEFAULT),
+            'role'           => 'Cashier',
+            'account_status' => 'Active',
+            'created_at'     => '2026-10-03 10:00:00',
+        ]);
+
+        $this->postForm("/users/{$userId}", [
+            'username'         => 'cashier_test',
+            'full_name'        => 'Cashier Test',
+            'email'            => '',
+            'phone'            => '',
+            'role'             => 'Cashier',
+            'account_status'   => 'Active',
+            'password'         => 'AnotherPassword123!',
+            'confirm_password' => 'AnotherPassword123!',
+        ])->assertRedirectTo(site_url('users'));
+
+        $this->assertTrue(password_verify('AnotherPassword123!', $model->find($userId)['password_hash']));
+        $this->assertFalse(password_verify('OldPassword123!', $model->find($userId)['password_hash']));
+
+        $this->postForm("/users/{$userId}", [
+            'username'         => 'cashier_test',
+            'full_name'        => 'Cashier Test',
+            'email'            => '',
+            'phone'            => '',
+            'role'             => 'Cashier',
+            'account_status'   => 'Active',
+            'password'         => 'mismatch-secret',
+            'confirm_password' => 'different-secret',
+        ])->assertRedirectTo(site_url("users/{$userId}/edit"));
+
+        $this->assertArrayNotHasKey('password', $_SESSION['_ci_old_input']['post'] ?? []);
+        $this->assertArrayNotHasKey('password', $_SESSION['form_values'] ?? []);
     }
 
     private function postForm(string $path, array $data)
     {
         $data[csrf_token()] = csrf_hash();
 
-        return $this->post($path, $data);
+        return $this->withSession([
+            'auth_user_id'      => $this->authUserId,
+            'auth_display_name' => 'Test Admin',
+        ])->post($path, $data);
     }
 }

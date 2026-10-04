@@ -1,7 +1,7 @@
     </main>
     <footer class="site-footer">
         <div class="container">
-            <p> @MarketMate POS.</p>
+            <p>MarketMate POS · A clearer way to manage the day.</p>
         </div>
     </footer>
     <script>

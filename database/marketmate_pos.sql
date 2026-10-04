@@ -45,15 +45,15 @@ VALUES
     (10, 'Rey Parks', 'Rpark@gmail.com', '0917-000-0010', 'New York State', 'Member', 30, 'Active', '2026-09-25 09:03:56');
 
 INSERT INTO users
-    (id, username, full_name, email, phone, role, account_status, created_at)
+    (id, username, full_name, email, phone, password_hash, role, account_status, created_at)
 VALUES
-    (1, 'admin01', 'Joby Miranda', 'staff.joby@gmail.com', '0928-000-0001', 'Admin', 'Active', '2026-09-25 07:49:29'),
-    (2, 'manager01', 'Lay Natawat', 'staff.lay@gmail.com', '0928-000-0002', 'Manager', 'Active', '2026-09-25 07:49:29'),
-    (3, 'cashier01', 'Henrich Jones', 'staff.henrich@gmail.com', '0928-000-0003', 'Cashier', 'Active', '2026-09-25 07:49:29'),
-    (4, 'cashier02', 'Emily Lalalta', 'staff.lalata@gmail.com', '0928-000-0004', 'Cashier', 'Inactive', '2026-09-25 07:49:29'),
-    (5, 'inventory01', 'Fourth Pirapat', 'staff.fourth@gmail.com', '0928-000-0005', 'Inventory', 'Active', '2026-09-25 07:49:29'),
-    (6, 'cashier03', 'Larry Page', 'staff.larry@gmail.com', '0928-000-0006', 'Cashier', 'Active', '2026-09-25 09:03:56'),
-    (7, 'cashier04', 'Jeff Bezos', 'staff.bezos@gmail.com', '0928-000-0007', 'Cashier', 'Active', '2026-09-25 09:03:56'),
-    (8, 'inventory02', 'Sergey Bin', 'staff.sergey@gmail.com', '0928-000-0008', 'Inventory', 'Active', '2026-09-25 09:03:56'),
-    (9, 'supervisor01', 'Michael Dell', 'staff.michael@gmail.com', '0928-000-0009', 'Supervisor', 'Active', '2026-09-25 09:03:56'),
-    (10, 'staff01', 'Larry Elison', 'staff.larry@gmail.com', '0928-000-0010', 'Staff', 'Inactive', '2026-09-25 09:03:56');
+    (1, 'admin01', 'Joby Miranda', 'staff.joby@gmail.com', '0928-000-0001', '$2y$10$k/MX23E610/L8141XsWpUOUKVIiJrXU8111JatYOa/5Aihgi2DxNq', 'Admin', 'Active', '2026-09-25 07:49:29'),
+    (2, 'manager01', 'Lay Natawat', 'staff.lay@gmail.com', '0928-000-0002', '$2y$10$kkG.XCToiQI4oL1RbB/W9uQpm/kBj3cNs.zYp7U4kQ4LnvNlwK1Pe', 'Manager', 'Active', '2026-09-25 07:49:29'),
+    (3, 'cashier01', 'Henrich Jones', 'staff.henrich@gmail.com', '0928-000-0003', '$2y$10$fH2kCqqkNm.dpbVKvpH1zeLBks2E7fccvv375HDC3h0WWhe7eK7SC', 'Cashier', 'Active', '2026-09-25 07:49:29'),
+    (4, 'cashier02', 'Emily Lalalta', 'staff.lalata@gmail.com', '0928-000-0004', '$2y$10$5aYynjdlr02eZ48zlT0MzewPv3PoDzOGgsI9Qt1GW1XaDUFO1OP76', 'Cashier', 'Inactive', '2026-09-25 07:49:29'),
+    (5, 'inventory01', 'Fourth Pirapat', 'staff.fourth@gmail.com', '0928-000-0005', '$2y$10$LYQmRht3TcyksEsLkXvHgu8xiBZXzyCm4bqpSdT.4pXjriPXlTtc6', 'Inventory', 'Active', '2026-09-25 07:49:29'),
+    (6, 'cashier03', 'Larry Page', 'staff.larry@gmail.com', '0928-000-0006', '$2y$10$SJuiNhQ7smKBn68AgAdoweNq1F6./826mEfCXzQ0SXorgAN8FxwOC', 'Cashier', 'Active', '2026-09-25 09:03:56'),
+    (7, 'cashier04', 'Jeff Bezos', 'staff.bezos@gmail.com', '0928-000-0007', '$2y$10$WHDYm6hLlFNBRa7cOm8HSu9Zo1sPieDPrAEVPtDI7ZaNBwvfkaDPe', 'Cashier', 'Active', '2026-09-25 09:03:56'),
+    (8, 'inventory02', 'Sergey Bin', 'staff.sergey@gmail.com', '0928-000-0008', '$2y$10$5WciuOTNtL4wLgbNSeh5O.NL5mtx7hGWFtOiQvObmWRXCSwyxnHoa', 'Inventory', 'Active', '2026-09-25 09:03:56'),
+    (9, 'supervisor01', 'Michael Dell', 'staff.michael@gmail.com', '0928-000-0009', '$2y$10$sgMMC3mHOB5GZEPPlN8ML.HF4eXmiu6nRPH4e4llI6d/uGoroCcN.', 'Supervisor', 'Active', '2026-09-25 09:03:56'),
+    (10, 'staff01', 'Larry Elison', 'staff.larry@gmail.com', '0928-000-0010', '$2y$10$G7esNlrclBfCQlNH0Y8eRey/7Z31jOV3QKIWs.qnquMkr18Ekc1Ze', 'Staff', 'Inactive', '2026-09-25 09:03:56');

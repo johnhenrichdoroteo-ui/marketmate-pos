@@ -17,6 +17,14 @@ if (! function_exists('marketmate_avatar_url')) {
 if (! function_exists('marketmate_old_value')) {
     function marketmate_old_value(string $field, string $default = ''): string
     {
+        $formValues = session('form_values');
+
+        if (is_array($formValues) && array_key_exists($field, $formValues)) {
+            $value = $formValues[$field];
+
+            return is_scalar($value) ? (string) $value : '';
+        }
+
         $value = old($field, $default, false);
 
         return is_scalar($value) ? (string) $value : '';

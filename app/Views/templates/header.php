@@ -17,8 +17,17 @@
             <nav id="primary-navigation" aria-label="Primary navigation">
                 <a class="<?= ($activePage ?? '') === 'home' ? 'active' : '' ?>" href="<?= base_url('/') ?>">Home</a>
                 <a class="<?= ($activePage ?? '') === 'about' ? 'active' : '' ?>" href="<?= base_url('about') ?>">About</a>
-                <a class="<?= ($activePage ?? '') === 'customers' ? 'active' : '' ?>" href="<?= base_url('customers') ?>">Customers</a>
-                <a class="<?= ($activePage ?? '') === 'users' ? 'active' : '' ?>" href="<?= base_url('users') ?>">Users</a>
+                <?php if (session('auth_user_id')): ?>
+                    <a class="<?= ($activePage ?? '') === 'dashboard' ? 'active' : '' ?>" href="<?= site_url('dashboard') ?>">Dashboard</a>
+                    <a class="<?= ($activePage ?? '') === 'customers' ? 'active' : '' ?>" href="<?= site_url('customers') ?>">Customers</a>
+                    <a class="<?= ($activePage ?? '') === 'users' ? 'active' : '' ?>" href="<?= site_url('users') ?>">Users</a>
+                    <form class="nav-logout" method="post" action="<?= site_url('logout') ?>">
+                        <?= csrf_field() ?>
+                        <button type="submit">Log out</button>
+                    </form>
+                <?php else: ?>
+                    <a class="nav-signin" href="<?= site_url('login') ?>">Staff sign in</a>
+                <?php endif; ?>
             </nav>
         </div>
     </header>
