@@ -1,8 +1,8 @@
 <section class="page-banner compact">
     <div class="container">
-        <p class="eyebrow">Staff directory</p>
-        <h1>User Accounts</h1>
-        <p class="lead">Staff records retrieved from the MarketMate POS database.</p>
+        <p class="eyebrow">PEOPLE / TEAM</p>
+        <h1>The people behind the counter.</h1>
+        <p class="lead">Keep staff identities, roles, and access in good order.</p>
     </div>
 </section>
 
@@ -21,6 +21,9 @@
 
         <?php if (session('notice')): ?>
             <p class="notice" role="status"><?= esc(session('notice')) ?></p>
+        <?php endif; ?>
+        <?php if (session('form_error')): ?>
+            <p class="form-alert" role="alert"><?= esc(session('form_error')) ?></p>
         <?php endif; ?>
 
         <div class="table-card">
@@ -47,7 +50,7 @@
                             <td data-label="Phone"><?= esc($user['phone'] ?? '') ?></td>
                             <td data-label="Role"><span class="role-badge"><?= esc($user['role']) ?></span></td>
                             <td data-label="Status"><span class="status-badge <?= $user['account_status'] === 'Active' ? 'is-active' : 'is-inactive' ?>"><?= esc($user['account_status']) ?></span></td>
-                            <td data-label="Action"><a class="table-link" href="<?= site_url('users/' . $user['id'] . '/edit') ?>">Edit</a></td>
+                            <td data-label="Action"><div class="row-actions"><a class="table-link" href="<?= site_url('users/' . $user['id'] . '/edit') ?>">Edit</a><form method="post" action="<?= site_url('users/' . $user['id'] . '/delete') ?>" data-confirm="Delete this staff account? This cannot be undone."><?= csrf_field() ?><button type="submit" class="quiet-action danger">Delete</button></form></div></td>
                         </tr>
                     <?php endforeach; ?>
                     <?php if ($users === []): ?>

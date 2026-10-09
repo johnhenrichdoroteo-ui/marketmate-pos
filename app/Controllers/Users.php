@@ -4,6 +4,7 @@ namespace App\Controllers;
 
 use App\Libraries\AvatarUploader;
 use App\Models\UserModel;
+use App\Models\SaleModel;
 use CodeIgniter\Database\Exceptions\DatabaseException;
 use CodeIgniter\Exceptions\PageNotFoundException;
 use CodeIgniter\HTTP\RedirectResponse;
@@ -43,32 +44,52 @@ class Users extends BaseController
     public function create(): RedirectResponse
     {
         $data = $this->formData();
+        $formValues = $data;
         $password = $this->request->getPost('password');
         $confirmation = $this->request->getPost('confirm_password');
         $password = is_string($password) ? $password : '';
         $confirmation = is_string($confirmation) ? $confirmation : '';
+        $file = $this->request->getFile('avatar');
+        $hasUpload = $file !== null && $file->getError() !== UPLOAD_ERR_NO_FILE;
+        $rules = $this->rules() + $this->passwordRules();
+        if ($hasUpload) {
+            $rules['avatar'] = $this->avatarRules();
+        }
 
         if (! $this->validateData(
             $data + ['password' => $password, 'confirm_password' => $confirmation],
-            $this->rules() + $this->passwordRules()
+            $rules
         )) {
             return redirect()->to(site_url('users/new'))
-                ->with('form_values', $data)
+                ->with('form_values', $formValues)
                 ->with('form_errors', $this->validator->getErrors());
         }
 
         $data['created_at'] = date('Y-m-d H:i:s');
         $data['password_hash'] = password_hash($password, PASSWORD_DEFAULT);
+        $uploader = new AvatarUploader();
+        $newAvatar = null;
+        if ($hasUpload) {
+            try {
+                $newAvatar = $uploader->store($file);
+                $data['avatar'] = $newAvatar;
+            } catch (Throwable $exception) {
+                log_message('error', 'Avatar upload failed: {message}', ['message' => $exception->getMessage()]);
+                return redirect()->to(site_url('users/new'))->with('form_values', $formValues)
+                    ->with('form_error', 'The picture could not be prepared. Please try another JPG or PNG.');
+            }
+        }
 
         try {
             if ((new UserModel())->insert($data) === false) {
-                return redirect()->to(site_url('users/new'))->with('form_values', $this->formData())
+                $uploader->remove($newAvatar);
+                return redirect()->to(site_url('users/new'))->with('form_values', $formValues)
                     ->with('form_error', 'The user could not be saved. Please try again.');
             }
         } catch (DatabaseException $exception) {
             log_message('error', 'User insert failed: {message}', ['message' => $exception->getMessage()]);
-
-            return redirect()->to(site_url('users/new'))->with('form_values', $this->formData())
+            $uploader->remove($newAvatar);
+            return redirect()->to(site_url('users/new'))->with('form_values', $formValues)
                 ->with('form_error', 'The user could not be saved. Please try again.');
         }
 
@@ -118,14 +139,21 @@ class Users extends BaseController
         }
 
         if ($hasUpload) {
-            $rules['avatar'] = 'uploaded[avatar]|is_image[avatar]|mime_in[avatar,image/jpeg,image/png]'
-                . '|ext_in[avatar,jpg,jpeg,png]|max_size[avatar,2048]|max_dims[avatar,4096,4096]';
+            $rules['avatar'] = $this->avatarRules();
         }
 
         if (! $this->validateData($data + ['password' => $password, 'confirm_password' => $confirmation], $rules)) {
             return redirect()->to(site_url("users/{$id}/edit"))
                 ->with('form_values', $formValues)
                 ->with('form_errors', $this->validator->getErrors());
+        }
+
+        if ($user['role'] === 'Admin' && $user['account_status'] === 'Active'
+            && ($data['role'] !== 'Admin' || $data['account_status'] !== 'Active')
+            && $model->where('role', 'Admin')->where('account_status', 'Active')->countAllResults() <= 1
+        ) {
+            return redirect()->to(site_url("users/{$id}/edit"))->with('form_values', $formValues)
+                ->with('form_error', 'Keep at least one active administrator.');
         }
 
         if ($password !== '') {
@@ -168,6 +196,37 @@ class Users extends BaseController
         return redirect()->to(site_url('users'))->with('notice', 'User updated.');
     }
 
+    public function delete(int $id): RedirectResponse
+    {
+        $model = new UserModel();
+        $user = $model->find($id);
+        if ($user === null) {
+            throw PageNotFoundException::forPageNotFound('User not found.');
+        }
+        if ($id === (int) session('auth_user_id')) {
+            return redirect()->to(site_url('users'))->with('form_error', 'You cannot delete your own signed-in account.');
+        }
+        if ($user['role'] === 'Admin' && $user['account_status'] === 'Active'
+            && $model->where('role', 'Admin')->where('account_status', 'Active')->countAllResults() <= 1
+        ) {
+            return redirect()->to(site_url('users'))->with('form_error', 'Keep at least one active administrator.');
+        }
+        if ((new SaleModel())->where('sold_by', $id)->countAllResults() > 0) {
+            return redirect()->to(site_url('users'))
+                ->with('form_error', 'This staff member appears in sales history. Set the account to Inactive instead.');
+        }
+
+        try {
+            $model->delete($id);
+        } catch (DatabaseException $exception) {
+            log_message('error', 'User delete failed: {message}', ['message' => $exception->getMessage()]);
+            return redirect()->to(site_url('users'))->with('form_error', 'The staff account could not be deleted.');
+        }
+
+        (new AvatarUploader())->remove($user['avatar'] ?? null);
+        return redirect()->to(site_url('users'))->with('notice', 'Staff account deleted.');
+    }
+
     private function formData(): array
     {
         $fields = ['username', 'full_name', 'email', 'phone', 'role', 'account_status'];
@@ -203,5 +262,11 @@ class Users extends BaseController
             'password'         => 'required|min_length[12]|max_length[72]',
             'confirm_password' => 'required|matches[password]',
         ];
+    }
+
+    private function avatarRules(): string
+    {
+        return 'uploaded[avatar]|is_image[avatar]|mime_in[avatar,image/jpeg,image/png]'
+            . '|ext_in[avatar,jpg,jpeg,png]|max_size[avatar,2048]|max_dims[avatar,4096,4096]';
     }
 }

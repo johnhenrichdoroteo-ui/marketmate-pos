@@ -3,21 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0d192a">
+    <meta name="description" content="Sign in to the MarketMate POS staff workspace.">
     <title><?= esc($title) ?> | MarketMate POS</title>
+    <link rel="icon" href="<?= base_url('assets/images/marketmate-mark.svg') ?>" type="image/svg+xml">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="<?= base_url('assets/css/style.css') ?>">
 </head>
 <body class="auth-page">
     <div class="auth-wrap">
         <header class="auth-topbar">
-            <a class="auth-brand" href="<?= base_url('/') ?>">MarketMate <span>POS</span></a>
-            <a class="auth-back" href="<?= base_url('/') ?>">Back to home</a>
+            <a class="brand" href="<?= base_url('/') ?>" aria-label="MarketMate POS home">
+                <img class="brand-symbol" src="<?= base_url('assets/images/marketmate-mark.svg') ?>" alt="" width="42" height="42">
+                <span class="brand-name">MarketMate <small>POINT OF SALE</small></span>
+            </a>
+            <a class="auth-back" href="<?= base_url('/') ?>">← Back to site</a>
         </header>
 
         <main class="auth-layout">
             <section class="auth-panel" aria-labelledby="login-title">
-                <p class="eyebrow">Staff workspace</p>
-                <h1 id="login-title">Welcome back.</h1>
-                <p class="auth-subtitle">Sign in to manage the people behind your business.</p>
+                <p class="auth-overline"><span aria-hidden="true"></span> STAFF ACCESS</p>
+                <h1 id="login-title">Pick up where<br><em>you left off.</em></h1>
+                <p class="auth-subtitle">Sign in to manage your catalog, record sales, and keep your team in sync.</p>
 
                 <?php if (session('auth_notice')): ?>
                     <p class="notice" role="status"><?= esc(session('auth_notice')) ?></p>
@@ -36,22 +45,23 @@
                         <label for="password">Password</label>
                         <input id="password" name="password" type="password" autocomplete="current-password" required>
                     </div>
-                    <button class="button primary auth-submit" type="submit">Sign in</button>
+                    <button class="button primary auth-submit" type="submit">Enter workspace <span aria-hidden="true">↗</span></button>
                 </form>
-                <p class="auth-help">For staff accounts only. Ask your administrator if you need access.</p>
+                <p class="auth-help">Staff accounts only. Ask your administrator if you need access.</p>
             </section>
 
-            <aside class="auth-visual" aria-label="MarketMate workspace preview">
+            <aside class="auth-visual" aria-label="What the MarketMate workspace connects">
+                <div class="auth-visual-topline"><span>MARKETMATE / POS</span><span>STAFF WORKSPACE</span></div>
                 <div class="auth-visual-copy">
-                    <p class="auth-visual-kicker">MarketMate POS</p>
-                    <h2>Make room for a smoother day.</h2>
-                    <p>Customers and staff, organized in one dependable workspace.</p>
+                    <span class="auth-visual-rule" aria-hidden="true"></span>
+                    <h2>One place for<br><em>the work behind every sale.</em></h2>
+                    <p>From the first item on the shelf to the final sale of the day, keep the important details together.</p>
                 </div>
-                <div class="auth-image-slot">
-                    <img src="<?= base_url('assets/images/marketmate-login-custom.jpg') ?>"
-                         alt="Small shop counter with a point-of-sale terminal and products">
+                <div class="auth-workflow">
+                    <div><span>01</span><strong>Catalog &amp; stock</strong><span aria-hidden="true">↗</span></div>
+                    <div><span>02</span><strong>People &amp; team</strong><span aria-hidden="true">↗</span></div>
+                    <div><span>03</span><strong>Sales &amp; history</strong><span aria-hidden="true">↗</span></div>
                 </div>
-                <p class="auth-visual-foot">A little more clarity for every business day.</p>
             </aside>
         </main>
     </div>

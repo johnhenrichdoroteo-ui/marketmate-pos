@@ -3,6 +3,7 @@
 namespace App\Controllers;
 
 use App\Models\CustomerModel;
+use App\Models\SaleModel;
 use CodeIgniter\Database\Exceptions\DatabaseException;
 use CodeIgniter\Exceptions\PageNotFoundException;
 use CodeIgniter\HTTP\RedirectResponse;
@@ -109,6 +110,28 @@ class Customers extends BaseController
         }
 
         return redirect()->to(site_url('customers'))->with('notice', 'Customer updated.');
+    }
+
+    public function delete(int $id): RedirectResponse
+    {
+        $model = new CustomerModel();
+        if ($model->find($id) === null) {
+            throw PageNotFoundException::forPageNotFound('Customer not found.');
+        }
+
+        if ((new SaleModel())->where('customer_id', $id)->countAllResults() > 0) {
+            return redirect()->to(site_url('customers'))
+                ->with('form_error', 'This customer appears in sales history. Set the account to Inactive instead.');
+        }
+
+        try {
+            $model->delete($id);
+        } catch (DatabaseException $exception) {
+            log_message('error', 'Customer delete failed: {message}', ['message' => $exception->getMessage()]);
+            return redirect()->to(site_url('customers'))->with('form_error', 'The customer could not be deleted.');
+        }
+
+        return redirect()->to(site_url('customers'))->with('notice', 'Customer deleted.');
     }
 
     private function formData(): array

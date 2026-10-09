@@ -22,7 +22,7 @@ $action = $editing ? site_url('users/' . $user['id']) : site_url('users');
                 <p class="form-alert" role="alert"><?= esc(session('form_error')) ?></p>
             <?php endif; ?>
 
-            <form method="post" action="<?= esc($action, 'attr') ?>" <?= $editing ? 'enctype="multipart/form-data"' : '' ?>>
+            <form method="post" action="<?= esc($action, 'attr') ?>" enctype="multipart/form-data">
                 <?= csrf_field() ?>
 
                 <div class="form-grid">
@@ -86,17 +86,15 @@ $action = $editing ? site_url('users/' . $user['id']) : site_url('users');
                     </div>
                 </div>
 
-                <?php if ($editing): ?>
-                    <div class="avatar-field">
-                        <img class="avatar-preview" src="<?= esc(marketmate_avatar_url($user['avatar'] ?? null), 'attr') ?>" alt="Current profile picture for <?= esc($user['full_name'], 'attr') ?>">
-                        <div class="form-field">
-                            <label for="avatar">Profile picture</label>
-                            <input id="avatar" name="avatar" type="file" accept="image/jpeg,image/png" aria-describedby="avatar-help">
-                            <p class="field-help" id="avatar-help">Optional. JPG or PNG, up to 2 MB. The picture will be cropped to a square.</p>
-                            <?php if (isset($errors['avatar'])): ?><p class="field-error"><?= esc($errors['avatar']) ?></p><?php endif; ?>
-                        </div>
+                <div class="avatar-field">
+                    <img class="avatar-preview" src="<?= esc(marketmate_avatar_url($user['avatar'] ?? null), 'attr') ?>" alt="<?= $editing ? 'Current profile picture' : 'Profile picture placeholder' ?>">
+                    <div class="form-field">
+                        <label for="avatar">Profile picture</label>
+                        <input id="avatar" name="avatar" type="file" accept="image/jpeg,image/png" aria-describedby="avatar-help">
+                        <p class="field-help" id="avatar-help">Optional. JPG or PNG, up to 2 MB. The picture will be cropped to a square.</p>
+                        <?php if (isset($errors['avatar'])): ?><p class="field-error"><?= esc($errors['avatar']) ?></p><?php endif; ?>
                     </div>
-                <?php endif; ?>
+                </div>
 
                 <div class="form-actions">
                     <button class="button primary" type="submit"><?= $editing ? 'Save changes' : 'Add user' ?></button>

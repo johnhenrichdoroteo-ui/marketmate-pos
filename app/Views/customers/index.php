@@ -1,8 +1,8 @@
 <section class="page-banner compact">
     <div class="container">
-        <p class="eyebrow">Account directory</p>
-        <h1>Customer Accounts</h1>
-        <p class="lead">Customer contact records retrieved from the MarketMate POS database.</p>
+        <p class="eyebrow">PEOPLE / CUSTOMERS</p>
+        <h1>Know who you serve.</h1>
+        <p class="lead">Customer details stay close to the sales that matter.</p>
     </div>
 </section>
 
@@ -21,6 +21,9 @@
 
         <?php if (session('notice')): ?>
             <p class="notice" role="status"><?= esc(session('notice')) ?></p>
+        <?php endif; ?>
+        <?php if (session('form_error')): ?>
+            <p class="form-alert" role="alert"><?= esc(session('form_error')) ?></p>
         <?php endif; ?>
 
         <div class="table-card">
@@ -50,7 +53,7 @@
                             <td data-label="Type"><span class="role-badge"><?= esc($customer['customer_type']) ?></span></td>
                             <td data-label="Points"><?= esc($customer['loyalty_points']) ?></td>
                             <td data-label="Status"><span class="status-badge <?= $customer['account_status'] === 'Active' ? 'is-active' : 'is-inactive' ?>"><?= esc($customer['account_status']) ?></span></td>
-                            <td data-label="Action"><a class="table-link" href="<?= site_url('customers/' . $customer['id'] . '/edit') ?>">Edit</a></td>
+                            <td data-label="Action"><div class="row-actions"><a class="table-link" href="<?= site_url('customers/' . $customer['id'] . '/edit') ?>">Edit</a><form method="post" action="<?= site_url('customers/' . $customer['id'] . '/delete') ?>" data-confirm="Delete this customer? This cannot be undone."><?= csrf_field() ?><button type="submit" class="quiet-action danger">Delete</button></form></div></td>
                         </tr>
                     <?php endforeach; ?>
                     <?php if ($customers === []): ?>

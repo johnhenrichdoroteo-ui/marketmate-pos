@@ -42,6 +42,24 @@ final class MarketMateAuthTest extends CIUnitTestCase
             created_at TEXT NOT NULL,
             avatar TEXT
         )');
+        $this->testDb->query('CREATE TABLE db_products (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL,
+            price DECIMAL(10,2) NOT NULL,
+            stock_quantity INTEGER NOT NULL,
+            image TEXT,
+            is_active INTEGER NOT NULL,
+            created_at TEXT NOT NULL
+        )');
+        $this->testDb->query('CREATE TABLE db_sales (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            product_id INTEGER NOT NULL,
+            customer_id INTEGER,
+            sold_by INTEGER NOT NULL,
+            quantity INTEGER NOT NULL,
+            total_price DECIMAL(10,2) NOT NULL,
+            created_at TEXT NOT NULL
+        )');
 
         $this->userId = (int) (new UserModel())->insert([
             'username'       => 'test_admin',
@@ -55,6 +73,8 @@ final class MarketMateAuthTest extends CIUnitTestCase
 
     protected function tearDown(): void
     {
+        $this->testDb->query('DROP TABLE db_sales');
+        $this->testDb->query('DROP TABLE db_products');
         $this->testDb->query('DROP TABLE db_users');
         $this->testDb->query('DROP TABLE db_customers');
 
@@ -63,9 +83,27 @@ final class MarketMateAuthTest extends CIUnitTestCase
 
     public function testGuestCannotOpenProtectedPages(): void
     {
-        foreach (['/dashboard', '/customers', '/customers/new', '/users', '/users/new', '/users/1/edit'] as $path) {
+        foreach (['/dashboard', '/products', '/products/new', '/sales', '/sales/new', '/customers', '/customers/new', '/users', '/users/new', '/users/1/edit'] as $path) {
             $this->withSession([])->get($path)->assertRedirectTo(site_url('login'));
         }
+    }
+
+    public function testNavigationChangesWithSignInState(): void
+    {
+        $guest = $this->withSession([])->get('/');
+        $guest->assertOK();
+        $guest->assertSee('site-body--guest');
+        $guest->assertSee('Staff sign in');
+        $guest->assertDontSee('nav-item-index');
+
+        $staff = $this->withSession([
+            'auth_user_id'      => $this->userId,
+            'auth_display_name' => 'Test Admin',
+        ])->get('/dashboard');
+        $staff->assertOK();
+        $staff->assertSee('site-body--staff');
+        $staff->assertSee('Overview');
+        $staff->assertDontSee('nav-item-index');
     }
 
     public function testCorrectPasswordCreatesSessionAndAllowsDashboard(): void
@@ -80,7 +118,12 @@ final class MarketMateAuthTest extends CIUnitTestCase
         $this->assertSame($this->userId, (int) ($_SESSION['auth_user_id'] ?? 0));
 
         $this->withSession($_SESSION)->get('/dashboard')->assertOK();
+        $this->withSession($_SESSION)->get('/products')->assertOK();
+        $this->withSession($_SESSION)->get('/products/new')->assertOK();
+        $this->withSession($_SESSION)->get('/sales')->assertOK();
+        $this->withSession($_SESSION)->get('/sales/new')->assertOK();
         $this->withSession($_SESSION)->get('/customers')->assertOK();
+        $this->withSession($_SESSION)->get('/users')->assertOK();
     }
 
     public function testWrongPasswordDoesNotCreateLoginSession(): void

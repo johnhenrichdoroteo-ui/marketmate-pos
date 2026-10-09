@@ -1,153 +1,89 @@
 # MarketMate POS
 
-MarketMate POS is a CodeIgniter 4 classroom project for managing customer and staff accounts. It now includes a staff sign-in, a protected dashboard, and session-based access to the account pages. The login screen includes a locally stored checkout illustration.
+MarketMate is a CodeIgniter 4 point-of-sale classroom project for small businesses. Staff can manage products, customers, and team accounts, then record sales that update stock and appear in a shared history. The starter catalog happens to feature electronics, but the system can be used for other products. The public Home and About pages introduce the project; the operational pages require a staff sign-in.
 
-## Features
+## What it does
 
-- Landing and About pages
-- Staff login and logout using hashed passwords and CodeIgniter sessions
-- Protected dashboard, Customer Accounts, and User Accounts routes
-- Guest redirects to login; inactive staff accounts cannot sign in
-- Customer Accounts page backed by MySQL
-- User Accounts page backed by MySQL
-- Add and edit forms for customer and user accounts
-- Server-side validation with errors and previously entered values preserved
-- Optional JPG/PNG user avatar upload on the edit form (2 MB maximum)
-- 300 × 300 avatar thumbnails and a placeholder for users without a picture
-- Ten sample customer records and ten sample staff records
-- Customer type, loyalty points, and account status
-- Staff role, contact details, and account status
-- CodeIgniter Models and Query Builder
-- Responsive navigation and table layout
-- Responsive login screen with a checkout illustration
+- **Products:** add, edit, archive, and restore any catalog item. Each product has a name, price, stock quantity, and optional prepared JPG/PNG image. The starter catalog includes electronics and accessories; archived products remain visible in past sales but cannot be sold.
+- **Customers:** add, edit, and delete customer records. Customers can optionally be linked to a sale. A customer already referenced by sales cannot be deleted; mark the account Inactive instead.
+- **Team:** add, edit, and delete staff, with an optional avatar and a hashed password. A staff member referenced by sales cannot be deleted, and the last active administrator cannot be removed or deactivated.
+- **Sales:** choose an available product, an optional active customer, and a quantity. The server reads the current product price, checks stock, records the transaction, and decreases stock together. Overselling is rejected. Sales history shows the product, customer or walk-in, staff member, quantity, total, and date.
+- **Access:** login, logout, session checks, protected routes, validation, CSRF tokens, and no-store headers for staff pages.
+
+This project records one product per sale, matching the midterm activity's `sales.product_id` design. It is not yet a multi-item cart or payment-processing system.
 
 ## Requirements
 
-- PHP 8.2 or newer
-- PHP extensions `intl`, `mbstring`, `mysqli`, `fileinfo`, and `gd`
-- Composer
-- MySQL or MariaDB
-- XAMPP can be used for Apache, MySQL, and phpMyAdmin
+- PHP 8.2 or newer, Composer, MySQL or MariaDB
+- PHP extensions: `intl`, `mbstring`, `mysqli`, `fileinfo`, `gd`
+- `sqlite3` for the isolated automated tests
 
-## Setup
+## Local setup
 
-1. Clone or download this repository.
-2. Open a terminal in the project folder.
-3. Install PHP dependencies:
+Open PowerShell in the project root (the folder containing `spark`):
 
-   ```powershell
-   composer install
-   ```
+```powershell
+composer install
+Copy-Item env .env
+```
 
-4. Copy `env` to `.env` if `.env` does not exist.
-5. Configure `.env` with your local settings:
+If `.env` already exists, keep it rather than replacing your local settings. Set the following values in `.env` for your computer:
 
-   ```ini
-   CI_ENVIRONMENT = development
-   app.baseURL = 'http://localhost:8080/'
+```ini
+CI_ENVIRONMENT = development
+app.baseURL = 'http://localhost:8080/'
 
-   database.default.hostname = localhost
-   database.default.database = marketmate_pos
-   database.default.username = root
-   database.default.password =
-   database.default.DBDriver = MySQLi
-   database.default.port = 3306
-   ```
+database.default.hostname = localhost
+database.default.database = marketmate_pos
+database.default.username = root
+database.default.password =
+database.default.DBDriver = MySQLi
+database.default.port = 3306
+```
 
-6. For a new installation, import `database/marketmate_pos.sql` into an empty database through phpMyAdmin or the MySQL command line. Do not import it over an existing MarketMate database. It includes the `users.avatar` and `users.password_hash` columns and sample records. The sample passwords are unknown; set one for your own local use in step 8.
-7. For an existing TFA2/TFA3 installation, keep the current database. If the avatar column has not yet been added, run:
+Start MySQL. Then choose **one** database path:
 
-   ```powershell
-   php spark migrate
-   ```
+1. **Fresh installation:** create an empty `marketmate_pos` database and import [`database/marketmate_pos.sql`](database/marketmate_pos.sql). It includes the required tables and sample product, customer, and staff records. Do not import it over existing records.
+2. **Existing MarketMate installation:** keep your current database and run `php spark migrate` to add the new tables. Then run `php spark db:seed ProductSeeder` to add any missing sample catalog items and attach the bundled photos to matching products that have no image. It can be rerun without changing existing prices, stock, or staff-uploaded photos. If older staff rows have no password hash, run `php spark db:seed StaffPasswordSeeder`.
 
-   This migration preserves existing user records. Existing MarketMate databases already have a nullable `password_hash` field. Fill only the missing hashes without changing account details:
+For either path, assign a private sign-in password to an active staff account. For the sample administrator:
 
-   ```powershell
-   php spark db:seed StaffPasswordSeeder
-   ```
+```powershell
+php spark marketmate:password admin01
+php spark serve
+```
 
-   Check `php -m` for `gd`; if it is missing, enable `extension=gd` in the PHP configuration used by the command line, then restart the PHP server.
-8. In your own terminal, generate a private sign-in password for an active staff account. For the sample admin:
+The password command displays a new one-time password and stores only its hash. Keep that password private; running the command again resets it. Open `http://localhost:8080/login` and sign in with username `admin01` and the generated password. The SQL export intentionally contains no usable plaintext passwords.
 
-   ```powershell
-   php spark marketmate:password admin01
-   ```
+If image preparation fails locally, confirm `gd` appears in `php -m`, enable `extension=gd` in the PHP configuration used by the CLI, and restart the development server.
 
-   The command prints a random one-time password. Copy it immediately and keep it private; only its hash is stored in the database. Running the command again resets that account's password. Do not put the printed password in GitHub, screenshots, or the SQL export.
-9. Start the application:
+## Main routes and files
 
-   ```powershell
-   php spark serve
-   ```
+| Area | URL | Implementation |
+| --- | --- | --- |
+| Public introduction | `/`, `/about` | `Pages` controller; `app/Views/pages/` |
+| Staff entry and overview | `/login`, `/dashboard` | `Auth`, `Dashboard`, `StaffAuth` filter |
+| Catalog management | `/products` | `Products`, `ProductModel`, `app/Views/products/` |
+| Record and review sales | `/sales/new`, `/sales` | `Sales`, `SaleModel`, `app/Views/sales/` |
+| Customer accounts | `/customers` | `Customers`, `CustomerModel`, `app/Views/customers/` |
+| Team accounts | `/users` | `Users`, `UserModel`, `app/Views/users/` |
 
-10. Visit `http://localhost:8080/login` and sign in with the staff username and generated password.
+The shared header, footer, and styles live in `app/Views/templates/`, `public/assets/css/style.css`, and `public/assets/js/app.js`. The Home hero uses an AI-generated storefront image provided by the project owner and saved locally at `public/assets/images/marketmate-storefront-hero-user.png`. The About hero uses an AI-generated interior image supplied by the project owner and saved locally at `public/assets/images/marketmate-about-interior.png`, and the About page includes the developer portrait at `public/assets/images/developer.jpg`. Uploaded product and staff images are prepared by classes in `app/Libraries/` and stored under `public/uploads/`; generated uploads are intentionally not tracked in Git.
 
-## Routes
+Most sample products use AI-generated, unbranded illustrative photos in `public/assets/images/products/`. The Compact Mechanical Keyboard instead uses a real photograph by [Marcus Richardson on Unsplash](https://unsplash.com/photos/a-black-mechanical-keyboard-rests-on-a-wooden-desk-qXWO1I4iPMM), available under the [Unsplash License](https://unsplash.com/license). The filenames are included in the SQL export and `ProductSeeder`; these catalog images do not claim to depict specific models for sale. Staff can add or replace a photo through the Add/Edit Product form. Products without an image still use a neutral placeholder.
 
-- `/` - Landing page
-- `/about` - About page
-- `GET /login` - Staff sign-in form
-- `POST /login` - Check credentials and create a session
-- `POST /logout` - End the session and return to login
-- `/dashboard` - Protected staff overview
-- `/customers` - Customer Accounts
-- `GET /customers/new` - Add Customer form
-- `POST /customers` - Validate and create a customer
-- `GET /customers/{id}/edit` - Edit Customer form
-- `POST /customers/{id}` - Validate and update a customer
-- `/users` - User Accounts
-- `GET /users/new` - Add User form
-- `POST /users` - Validate and create a user
-- `GET /users/{id}/edit` - Edit User form with optional avatar upload
-- `POST /users/{id}` - Validate and update a user/avatar
+The migration `app/Database/Migrations/2026-10-06-000001_CreateProductsAndSales.php` adds the product and sale tables. Sales refer to products and staff, and optionally to customers. The sale controller uses a conditional stock update inside a database transaction, so a failed insert does not leave stock reduced. The displayed total comes from the stored product price, not an amount posted by the browser.
 
-All dashboard, customer, and user routes require a valid staff session. Home, About, and Login remain public. Automatic routing is disabled, so there is no unprotected controller URL around the route filter.
+## Verification
 
-## Database Flow
-
-The `CustomerModel` and `UserModel` retrieve and save database records. The controllers validate only the expected form fields before calling `insert()` or `update()`. Forms include CSRF tokens and show field errors while keeping previously entered values. The listing views use `foreach` to display the records.
-
-For avatars, the user edit form sends multipart data. The controller checks the file type, extension, size, and image dimensions. `AvatarUploader` moves the upload to a private staging folder and uses CodeIgniter's Image service to create a 300 × 300 public image. The database stores only its generated filename. Uploaded pictures are kept in `public/uploads/avatars/` and are excluded from Git; back up or transfer that folder when deploying. Without its picture file, a record displays the placeholder.
-
-The login controller verifies a submitted password against `users.password_hash` and regenerates the session ID on successful sign-in. The `StaffAuth` route filter checks the session and that the staff account is still active before every protected request. Logout destroys the session. Adding a user requires a password and confirmation; editing a user can optionally replace the password. Password input is never flashed back to the form. The split login layout is in `app/Views/auth/login.php`; its checkout illustration is saved in `public/assets/images/marketmate-login-custom.jpg` and styled in `public/assets/css/style.css`.
-
-This is still a classroom prototype. Before using it with real business data on a public server, add rate limiting, role-specific permissions, HTTPS, and production deployment configuration. Do not commit `.env`, generated credentials, or uploaded private data.
-
-## Testing
-
-Run the automated checks from the project root:
+Run the isolated automated checks from the project root:
 
 ```powershell
 php -d extension=sqlite3 vendor\bin\phpunit --no-coverage
 ```
 
-The SQLite extension is used for isolated form and authentication tests; they do not modify the live MySQL records. Manual checks: open `/customers` while signed out (redirect to login), sign in, visit `/dashboard`, `/customers`, and `/users`, then log out and try `/users` again (redirect to login). Also test a wrong password and an inactive account.
+The tests use an in-memory SQLite database and do not modify your MySQL records. For a manual check: sign in, create or edit a product, record a sale, confirm its stock decreased and the sale appears in history, then try to sell more than the remaining stock. Log out and confirm `/products`, `/sales`, `/customers`, and `/users` redirect to login. Check the public pages in both desktop and narrow browser widths.
 
-The tables retain the required TFA2 fields (`id`, `full_name`, `created_at`, and the specified contact and username fields). They also include optional POS fields from the initial schema draft. `created_at` represents the registration date. `password_hash` stores a one-way hash, never a plaintext password.
+## Deployment note
 
-### Customer fields
-
-| Field | Purpose |
-| --- | --- |
-| `id` | Unique customer ID |
-| `full_name`, `email`, `phone` | Contact information |
-| `address` | Optional location |
-| `customer_type` | Regular or Member |
-| `loyalty_points` | Points balance |
-| `account_status` | Active or Inactive |
-| `created_at` | Registration date and time |
-
-### Staff fields
-
-| Field | Purpose |
-| --- | --- |
-| `id` | Unique staff ID |
-| `username`, `full_name` | Account identity |
-| `email`, `phone` | Optional contact information |
-| `password_hash` | One-way hash used to verify staff login |
-| `role` | Admin, Manager, Cashier, or Inventory |
-| `account_status` | Active or Inactive |
-| `last_login` | Optional last sign-in time |
-| `created_at` | Account creation date and time |
-| `avatar` | Optional prepared picture filename |
+No live hosting is configured by this repository. Do not commit `.env`, generated passwords, or uploaded private data. Before use with real business data, add role-based permissions, rate limiting, HTTPS, backups, and a production deployment review.

@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="210" viewBox="0 0 960 210" fill="none">
+  <g transform="translate(24 25) scale(2.5)">
+    <rect width="64" height="64" rx="15" fill="#14283F"/>
+    <path d="M14 13h28v33l-5-3-5 3-5-3-5 3-8-4V13Z" fill="#C8E4FF"/>
+    <path d="M25 21h26v32l-5-3-5 3-5-3-5 3-6-3V21Z" fill="#78B9F7"/>
+    <path d="M32 31h12M32 37h9" stroke="#14283F" stroke-width="3" stroke-linecap="round"/>
+  </g>
+  <text x="220" y="119" fill="#152337" font-family="Segoe UI, Arial, sans-serif" font-size="103" font-weight="700" letter-spacing="-4">MarketMate</text>
+  <text x="226" y="164" fill="#3F6691" font-family="Segoe UI, Arial, sans-serif" font-size="24" font-weight="700" letter-spacing="7">POINT OF SALE</text>
+</svg>
