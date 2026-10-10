@@ -49,6 +49,10 @@ if (isset($_GET['__marketmate_health'])) {
         'mysql_scheme_position' => strpos($rawDatabaseUrl, 'mysql://'),
         'url_separator_position' => strpos($rawDatabaseUrl, '://'),
         'first_codepoint' => $rawDatabaseUrl !== '' ? ord($rawDatabaseUrl[0]) : null,
+        'at_position' => strpos($rawDatabaseUrl, '@'),
+        'colon_count' => substr_count($rawDatabaseUrl, ':'),
+        'slash_count' => substr_count($rawDatabaseUrl, '/'),
+        'last_slash_position' => strrpos($rawDatabaseUrl, '/'),
     ];
 
     if ($status['mysqli'] && is_array($parts)) {
