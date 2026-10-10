@@ -118,6 +118,8 @@ _modules/*
 *.sublime-project
 .phpintel
 /api/
+!/api/
+!/api/index.php
 
 # Visual Studio Code
 .vscode/

@@ -194,6 +194,35 @@ class Database extends Config
     {
         parent::__construct();
 
+        $databaseUrl = getenv('DATABASE_URL') ?: getenv('MYSQL_URL');
+        if (is_string($databaseUrl) && $databaseUrl !== '') {
+            $parts = parse_url($databaseUrl);
+            if (is_array($parts) && in_array($parts['scheme'] ?? '', ['mysql', 'mariadb'], true)) {
+                $this->default['hostname'] = $parts['host'] ?? $this->default['hostname'];
+                $this->default['username'] = isset($parts['user']) ? urldecode($parts['user']) : $this->default['username'];
+                $this->default['password'] = isset($parts['pass']) ? urldecode($parts['pass']) : $this->default['password'];
+                $this->default['database'] = isset($parts['path']) ? ltrim($parts['path'], '/') : $this->default['database'];
+                $this->default['port'] = $parts['port'] ?? $this->default['port'];
+            }
+        }
+
+        $environmentMap = [
+            'hostname' => ['DB_HOST', 'MYSQLHOST'],
+            'username' => ['DB_USERNAME', 'MYSQLUSER'],
+            'password' => ['DB_PASSWORD', 'MYSQLPASSWORD'],
+            'database' => ['DB_DATABASE', 'MYSQLDATABASE'],
+            'port'     => ['DB_PORT', 'MYSQLPORT'],
+        ];
+        foreach ($environmentMap as $key => $names) {
+            foreach ($names as $name) {
+                $value = getenv($name);
+                if ($value !== false && $value !== '') {
+                    $this->default[$key] = $key === 'port' ? (int) $value : $value;
+                    break;
+                }
+            }
+        }
+
         // Ensure that we always set the database group to 'tests' if
         // we are currently running an automated test suite, so that
         // we don't overwrite live data on accident.

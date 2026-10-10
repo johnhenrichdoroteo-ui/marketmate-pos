@@ -24,7 +24,13 @@ class PreparedImageUploader
             throw new RuntimeException('The GD image extension is required to prepare images.');
         }
 
-        foreach ([$this->stagingDirectory, $this->publicDirectory] as $directory) {
+        $serverless = (bool) getenv('VERCEL');
+        $directories = [$this->stagingDirectory];
+        if (! $serverless) {
+            $directories[] = $this->publicDirectory;
+        }
+
+        foreach ($directories as $directory) {
             if (! is_dir($directory) && ! mkdir($directory, 0775, true) && ! is_dir($directory)) {
                 throw new RuntimeException('The image folder could not be created.');
             }
@@ -34,21 +40,33 @@ class PreparedImageUploader
         $filename = bin2hex(random_bytes(16)) . $extension;
         $stagingName = bin2hex(random_bytes(16)) . $extension;
         $stagingPath = $this->stagingDirectory . $stagingName;
-        $publicPath = $this->publicDirectory . $filename;
+        $preparedPath = $serverless
+            ? $this->stagingDirectory . 'prepared-' . $filename
+            : $this->publicDirectory . $filename;
 
         try {
             $file->move($this->stagingDirectory, $stagingName);
             $image = service('image');
             $image->withFile($stagingPath)->fit($this->width, $this->height, 'center');
 
-            if (! $image->save($publicPath)) {
+            if (! $image->save($preparedPath)) {
                 throw new RuntimeException('The image could not be prepared.');
+            }
+
+            if ($serverless) {
+                $contents = file_get_contents($preparedPath);
+                if ($contents === false) {
+                    throw new RuntimeException('The prepared image could not be read.');
+                }
+
+                $mime = $extension === '.png' ? 'image/png' : 'image/jpeg';
+                return 'data:' . $mime . ';base64,' . base64_encode($contents);
             }
 
             return $filename;
         } catch (Throwable $exception) {
-            if (is_file($publicPath)) {
-                unlink($publicPath);
+            if (is_file($preparedPath)) {
+                unlink($preparedPath);
             }
 
             throw $exception;
@@ -56,11 +74,18 @@ class PreparedImageUploader
             if (is_file($stagingPath)) {
                 unlink($stagingPath);
             }
+            if ($serverless && is_file($preparedPath)) {
+                unlink($preparedPath);
+            }
         }
     }
 
     public function remove(?string $filename): void
     {
+        if ($filename !== null && str_starts_with($filename, 'data:image/')) {
+            return;
+        }
+
         if ($filename === null || preg_match('/\A[a-f0-9]{32}\.(?:jpg|png)\z/', $filename) !== 1) {
             return;
         }

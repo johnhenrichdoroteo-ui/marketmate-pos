@@ -14,7 +14,7 @@ class CreateProductsAndSales extends Migration
                 'name'           => ['type' => 'VARCHAR', 'constraint' => 100],
                 'price'          => ['type' => 'DECIMAL', 'constraint' => '10,2'],
                 'stock_quantity' => ['type' => 'INT', 'default' => 0],
-                'image'          => ['type' => 'VARCHAR', 'constraint' => 255, 'null' => true],
+                'image'          => ['type' => 'MEDIUMTEXT', 'null' => true],
                 'is_active'      => ['type' => 'TINYINT', 'constraint' => 1, 'default' => 1],
                 'created_at'     => ['type' => 'DATETIME'],
             ]);

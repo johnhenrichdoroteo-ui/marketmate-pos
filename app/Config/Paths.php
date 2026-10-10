@@ -18,6 +18,13 @@ namespace Config;
  */
 class Paths
 {
+    public function __construct()
+    {
+        if (getenv('VERCEL')) {
+            $this->writableDirectory = rtrim(sys_get_temp_dir(), '\\/') . '/marketmate-writable';
+        }
+    }
+
     /**
      * ---------------------------------------------------------------
      * SYSTEM FOLDER NAME

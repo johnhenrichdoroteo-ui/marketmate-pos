@@ -1,8 +1,4 @@
-CREATE DATABASE IF NOT EXISTS marketmate_pos
-    CHARACTER SET utf8mb4
-    COLLATE utf8mb4_general_ci;
-
-USE marketmate_pos;
+-- Import this schema into an empty MySQL database selected by your hosting provider.
 
 CREATE TABLE customers (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -27,7 +23,7 @@ CREATE TABLE users (
     account_status VARCHAR(10) NOT NULL DEFAULT 'Active',
     last_login DATETIME,
     created_at DATETIME NOT NULL,
-    avatar VARCHAR(255) NULL
+    avatar MEDIUMTEXT NULL
 );
 
 CREATE TABLE products (
@@ -35,7 +31,7 @@ CREATE TABLE products (
     name VARCHAR(100) NOT NULL,
     price DECIMAL(10,2) NOT NULL,
     stock_quantity INT NOT NULL DEFAULT 0,
-    image VARCHAR(255),
+    image MEDIUMTEXT,
     is_active TINYINT(1) NOT NULL DEFAULT 1,
     created_at DATETIME NOT NULL
 );
@@ -52,6 +48,14 @@ CREATE TABLE sales (
     FOREIGN KEY (product_id) REFERENCES products(id),
     FOREIGN KEY (customer_id) REFERENCES customers(id),
     FOREIGN KEY (sold_by) REFERENCES users(id)
+);
+
+CREATE TABLE ci_sessions (
+    id VARCHAR(128) NOT NULL PRIMARY KEY,
+    ip_address VARCHAR(45) NOT NULL,
+    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    data BLOB NOT NULL,
+    KEY ci_sessions_timestamp (timestamp)
 );
 
 INSERT INTO customers

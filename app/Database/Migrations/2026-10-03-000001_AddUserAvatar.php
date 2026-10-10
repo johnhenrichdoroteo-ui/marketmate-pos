@@ -11,8 +11,7 @@ class AddUserAvatar extends Migration
         if (! $this->db->fieldExists('avatar', 'users')) {
             $this->forge->addColumn('users', [
                 'avatar' => [
-                    'type'       => 'VARCHAR',
-                    'constraint' => 255,
+                    'type'       => 'MEDIUMTEXT',
                     'null'       => true,
                 ],
             ]);

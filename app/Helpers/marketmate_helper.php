@@ -3,6 +3,10 @@
 if (! function_exists('marketmate_avatar_url')) {
     function marketmate_avatar_url(?string $filename): string
     {
+        if ($filename !== null && (str_starts_with($filename, 'data:image/jpeg;base64,') || str_starts_with($filename, 'data:image/png;base64,'))) {
+            return $filename;
+        }
+
         if ($filename !== null
             && preg_match('/\A[a-f0-9]{32}\.(?:jpg|png)\z/', $filename) === 1
             && is_file(FCPATH . 'uploads/avatars/' . $filename)
@@ -34,6 +38,10 @@ if (! function_exists('marketmate_old_value')) {
 if (! function_exists('marketmate_product_image_url')) {
     function marketmate_product_image_url(?string $filename): string
     {
+        if ($filename !== null && (str_starts_with($filename, 'data:image/jpeg;base64,') || str_starts_with($filename, 'data:image/png;base64,'))) {
+            return $filename;
+        }
+
         if ($filename !== null
             && preg_match('/\A[a-f0-9]{32}\.(?:jpg|png)\z/', $filename) === 1
             && is_file(FCPATH . 'uploads/products/' . $filename)
