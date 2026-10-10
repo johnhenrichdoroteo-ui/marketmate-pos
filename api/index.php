@@ -20,10 +20,16 @@ if (isset($_GET['__marketmate_health'])) {
     };
     $databaseUrl = $readEnvironment('MYSQL_PUBLIC_URL') ?: $readEnvironment('DATABASE_URL') ?: $readEnvironment('MYSQL_URL');
     $parts = is_string($databaseUrl) ? parse_url($databaseUrl) : false;
+    $environmentKeys = array_values(array_filter(
+        array_unique(array_merge(array_keys($_ENV), array_keys($_SERVER))),
+        static fn (string $key): bool => str_contains($key, 'MYSQL') || str_contains($key, 'DATABASE') || $key === 'CI_ENVIRONMENT',
+    ));
     $status = [
+        'version' => '2026-10-10.2',
         'mysqli' => extension_loaded('mysqli'),
         'database_url' => is_array($parts),
         'database' => false,
+        'environment_keys' => $environmentKeys,
     ];
 
     if ($status['mysqli'] && is_array($parts)) {
