@@ -30,6 +30,10 @@ if (isset($_GET['__marketmate_health'])) {
         'database_url' => is_array($parts),
         'database' => false,
         'environment_keys' => $environmentKeys,
+        'public_url_type' => get_debug_type($_ENV['MYSQL_PUBLIC_URL'] ?? $_SERVER['MYSQL_PUBLIC_URL'] ?? null),
+        'public_url_length' => is_string($_ENV['MYSQL_PUBLIC_URL'] ?? $_SERVER['MYSQL_PUBLIC_URL'] ?? null)
+            ? strlen($_ENV['MYSQL_PUBLIC_URL'] ?? $_SERVER['MYSQL_PUBLIC_URL'])
+            : null,
     ];
 
     if ($status['mysqli'] && is_array($parts)) {
