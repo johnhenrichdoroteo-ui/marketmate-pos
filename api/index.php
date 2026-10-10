@@ -22,14 +22,14 @@ if (isset($_GET['__marketmate_health'])) {
     $rawDatabaseUrl = is_string($databaseUrl) ? $databaseUrl : '';
     $databaseUrl = is_string($databaseUrl) ? trim($databaseUrl, " \t\n\r\0\x0B\"'") : $databaseUrl;
     $parts = is_string($databaseUrl) ? parse_url($databaseUrl) : false;
-    if (! is_array($parts) && is_string($databaseUrl) && preg_match('~^(mysql|mariadb)://([^:]+):(.+)@([^:/]+):(\d+)/([^?]+)~', $databaseUrl, $matches)) {
+    if (! is_array($parts) && is_string($databaseUrl) && preg_match('~^(mysql|mariadb)://([^:]+):(.+)@([^:/]+)(?::(\d+))?(?:/([^?]*))?~', $databaseUrl, $matches)) {
         $parts = [
             'scheme' => $matches[1],
             'user' => $matches[2],
             'pass' => $matches[3],
             'host' => $matches[4],
-            'port' => (int) $matches[5],
-            'path' => '/' . $matches[6],
+            'port' => isset($matches[5]) && $matches[5] !== '' ? (int) $matches[5] : 3306,
+            'path' => '/' . ($matches[6] ?? ''),
         ];
     }
     $environmentKeys = array_values(array_filter(

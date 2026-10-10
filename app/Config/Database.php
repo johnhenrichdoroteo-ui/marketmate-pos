@@ -212,14 +212,14 @@ class Database extends Config
         if (is_string($databaseUrl) && $databaseUrl !== '') {
             $databaseUrl = trim($databaseUrl, " \t\n\r\0\x0B\"'");
             $parts = parse_url($databaseUrl);
-            if (! is_array($parts) && preg_match('~^(mysql|mariadb)://([^:]+):(.+)@([^:/]+):(\d+)/([^?]+)~', $databaseUrl, $matches)) {
+            if (! is_array($parts) && preg_match('~^(mysql|mariadb)://([^:]+):(.+)@([^:/]+)(?::(\d+))?(?:/([^?]*))?~', $databaseUrl, $matches)) {
                 $parts = [
                     'scheme' => $matches[1],
                     'user' => $matches[2],
                     'pass' => $matches[3],
                     'host' => $matches[4],
-                    'port' => (int) $matches[5],
-                    'path' => '/' . $matches[6],
+                    'port' => isset($matches[5]) && $matches[5] !== '' ? (int) $matches[5] : 3306,
+                    'path' => '/' . ($matches[6] ?? ''),
                 ];
             }
             if (is_array($parts) && in_array($parts['scheme'] ?? '', ['mysql', 'mariadb'], true)) {
