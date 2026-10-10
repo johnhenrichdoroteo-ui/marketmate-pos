@@ -194,9 +194,20 @@ class Database extends Config
     {
         parent::__construct();
 
+        $readEnvironment = static function (string $name): string|false {
+            $value = getenv($name);
+            if ($value !== false) {
+                return $value;
+            }
+
+            $value = $_ENV[$name] ?? $_SERVER[$name] ?? false;
+
+            return is_string($value) ? $value : false;
+        };
+
         // Vercel runs outside Railway's private network, so prefer Railway's
         // public TCP endpoint when the integration exposes one.
-        $databaseUrl = getenv('MYSQL_PUBLIC_URL') ?: getenv('DATABASE_URL') ?: getenv('MYSQL_URL');
+        $databaseUrl = $readEnvironment('MYSQL_PUBLIC_URL') ?: $readEnvironment('DATABASE_URL') ?: $readEnvironment('MYSQL_URL');
         $hasDatabaseUrl = false;
         if (is_string($databaseUrl) && $databaseUrl !== '') {
             $parts = parse_url($databaseUrl);
@@ -219,7 +230,7 @@ class Database extends Config
         ];
         foreach ($environmentMap as $key => $names) {
             foreach ($names as $name) {
-                $value = getenv($name);
+                $value = $readEnvironment($name);
                 if ($value !== false && $value !== '') {
                     $this->default[$key] = $key === 'port' ? (int) $value : $value;
                     break;

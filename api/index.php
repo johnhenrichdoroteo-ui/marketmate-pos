@@ -8,7 +8,17 @@ $writable = rtrim(sys_get_temp_dir(), '\\/') . '/marketmate-writable';
 
 if (isset($_GET['__marketmate_health'])) {
     header('Content-Type: application/json');
-    $databaseUrl = getenv('MYSQL_PUBLIC_URL') ?: getenv('DATABASE_URL') ?: getenv('MYSQL_URL');
+    $readEnvironment = static function (string $name): string|false {
+        $value = getenv($name);
+        if ($value !== false) {
+            return $value;
+        }
+
+        $value = $_ENV[$name] ?? $_SERVER[$name] ?? false;
+
+        return is_string($value) ? $value : false;
+    };
+    $databaseUrl = $readEnvironment('MYSQL_PUBLIC_URL') ?: $readEnvironment('DATABASE_URL') ?: $readEnvironment('MYSQL_URL');
     $parts = is_string($databaseUrl) ? parse_url($databaseUrl) : false;
     $status = [
         'mysqli' => extension_loaded('mysqli'),
