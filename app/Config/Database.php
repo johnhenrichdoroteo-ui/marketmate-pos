@@ -207,7 +207,7 @@ class Database extends Config
 
         // Vercel runs outside Railway's private network, so prefer Railway's
         // public TCP endpoint when the integration exposes one.
-        $databaseUrl = $readEnvironment('MYSQL_PUBLIC_URL') ?: $readEnvironment('DATABASE_URL') ?: $readEnvironment('MYSQL_URL');
+        $databaseUrl = $readEnvironment('DATABASE_URL') ?: $readEnvironment('MYSQL_PUBLIC_URL') ?: $readEnvironment('MYSQL_URL');
         $hasDatabaseUrl = false;
         if (is_string($databaseUrl) && $databaseUrl !== '') {
             $databaseUrl = trim($databaseUrl, " \t\n\r\0\x0B\"'");
