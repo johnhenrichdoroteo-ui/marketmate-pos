@@ -19,6 +19,8 @@ if (isset($_GET['__marketmate_health'])) {
         return is_string($value) ? $value : false;
     };
     $databaseUrl = $readEnvironment('MYSQL_PUBLIC_URL') ?: $readEnvironment('DATABASE_URL') ?: $readEnvironment('MYSQL_URL');
+    $rawDatabaseUrl = is_string($databaseUrl) ? $databaseUrl : '';
+    $databaseUrl = is_string($databaseUrl) ? trim($databaseUrl, " \t\n\r\0\x0B\"'") : $databaseUrl;
     $parts = is_string($databaseUrl) ? parse_url($databaseUrl) : false;
     if (! is_array($parts) && is_string($databaseUrl) && preg_match('~^(mysql|mariadb)://([^:]+):(.+)@([^:/]+):(\d+)/([^?]+)~', $databaseUrl, $matches)) {
         $parts = [
@@ -35,7 +37,7 @@ if (isset($_GET['__marketmate_health'])) {
         static fn (string $key): bool => str_contains($key, 'MYSQL') || str_contains($key, 'DATABASE') || $key === 'CI_ENVIRONMENT',
     ));
     $status = [
-        'version' => '2026-10-10.2',
+        'version' => '2026-10-10.3',
         'mysqli' => extension_loaded('mysqli'),
         'database_url' => is_array($parts),
         'database' => false,
@@ -44,6 +46,9 @@ if (isset($_GET['__marketmate_health'])) {
         'public_url_length' => is_string($_ENV['MYSQL_PUBLIC_URL'] ?? $_SERVER['MYSQL_PUBLIC_URL'] ?? null)
             ? strlen($_ENV['MYSQL_PUBLIC_URL'] ?? $_SERVER['MYSQL_PUBLIC_URL'])
             : null,
+        'mysql_scheme_position' => strpos($rawDatabaseUrl, 'mysql://'),
+        'url_separator_position' => strpos($rawDatabaseUrl, '://'),
+        'first_codepoint' => $rawDatabaseUrl !== '' ? ord($rawDatabaseUrl[0]) : null,
     ];
 
     if ($status['mysqli'] && is_array($parts)) {

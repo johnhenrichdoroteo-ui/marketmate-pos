@@ -210,6 +210,7 @@ class Database extends Config
         $databaseUrl = $readEnvironment('MYSQL_PUBLIC_URL') ?: $readEnvironment('DATABASE_URL') ?: $readEnvironment('MYSQL_URL');
         $hasDatabaseUrl = false;
         if (is_string($databaseUrl) && $databaseUrl !== '') {
+            $databaseUrl = trim($databaseUrl, " \t\n\r\0\x0B\"'");
             $parts = parse_url($databaseUrl);
             if (! is_array($parts) && preg_match('~^(mysql|mariadb)://([^:]+):(.+)@([^:/]+):(\d+)/([^?]+)~', $databaseUrl, $matches)) {
                 $parts = [
