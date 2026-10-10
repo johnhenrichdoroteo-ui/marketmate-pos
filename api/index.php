@@ -6,7 +6,7 @@ use Config\Paths;
 $root = dirname(__DIR__);
 $writable = rtrim(sys_get_temp_dir(), '\\/') . '/marketmate-writable';
 
-if (($_SERVER['REQUEST_URI'] ?? '') === '/__marketmate_health') {
+if (isset($_GET['__marketmate_health'])) {
     header('Content-Type: application/json');
     $databaseUrl = getenv('MYSQL_PUBLIC_URL') ?: getenv('DATABASE_URL') ?: getenv('MYSQL_URL');
     $parts = is_string($databaseUrl) ? parse_url($databaseUrl) : false;
