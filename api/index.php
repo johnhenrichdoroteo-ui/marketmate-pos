@@ -20,6 +20,16 @@ if (isset($_GET['__marketmate_health'])) {
     };
     $databaseUrl = $readEnvironment('MYSQL_PUBLIC_URL') ?: $readEnvironment('DATABASE_URL') ?: $readEnvironment('MYSQL_URL');
     $parts = is_string($databaseUrl) ? parse_url($databaseUrl) : false;
+    if (! is_array($parts) && is_string($databaseUrl) && preg_match('~^(mysql|mariadb)://([^:]+):(.+)@([^:/]+):(\d+)/([^?]+)~', $databaseUrl, $matches)) {
+        $parts = [
+            'scheme' => $matches[1],
+            'user' => $matches[2],
+            'pass' => $matches[3],
+            'host' => $matches[4],
+            'port' => (int) $matches[5],
+            'path' => '/' . $matches[6],
+        ];
+    }
     $environmentKeys = array_values(array_filter(
         array_unique(array_merge(array_keys($_ENV), array_keys($_SERVER))),
         static fn (string $key): bool => str_contains($key, 'MYSQL') || str_contains($key, 'DATABASE') || $key === 'CI_ENVIRONMENT',

@@ -211,6 +211,16 @@ class Database extends Config
         $hasDatabaseUrl = false;
         if (is_string($databaseUrl) && $databaseUrl !== '') {
             $parts = parse_url($databaseUrl);
+            if (! is_array($parts) && preg_match('~^(mysql|mariadb)://([^:]+):(.+)@([^:/]+):(\d+)/([^?]+)~', $databaseUrl, $matches)) {
+                $parts = [
+                    'scheme' => $matches[1],
+                    'user' => $matches[2],
+                    'pass' => $matches[3],
+                    'host' => $matches[4],
+                    'port' => (int) $matches[5],
+                    'path' => '/' . $matches[6],
+                ];
+            }
             if (is_array($parts) && in_array($parts['scheme'] ?? '', ['mysql', 'mariadb'], true)) {
                 $hasDatabaseUrl = true;
                 $this->default['hostname'] = $parts['host'] ?? $this->default['hostname'];
