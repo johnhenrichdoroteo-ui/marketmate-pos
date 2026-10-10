@@ -194,7 +194,9 @@ class Database extends Config
     {
         parent::__construct();
 
-        $databaseUrl = getenv('DATABASE_URL') ?: getenv('MYSQL_URL');
+        // Vercel runs outside Railway's private network, so prefer Railway's
+        // public TCP endpoint when the integration exposes one.
+        $databaseUrl = getenv('MYSQL_PUBLIC_URL') ?: getenv('DATABASE_URL') ?: getenv('MYSQL_URL');
         if (is_string($databaseUrl) && $databaseUrl !== '') {
             $parts = parse_url($databaseUrl);
             if (is_array($parts) && in_array($parts['scheme'] ?? '', ['mysql', 'mariadb'], true)) {
