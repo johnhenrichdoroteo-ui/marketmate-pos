@@ -196,7 +196,7 @@ class Database extends Config
 
         $readEnvironment = static function (string $name): string|false {
             $value = getenv($name);
-            if ($value !== false) {
+            if ($value !== false && $value !== '') {
                 return $value;
             }
 

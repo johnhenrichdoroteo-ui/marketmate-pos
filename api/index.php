@@ -10,7 +10,7 @@ if (isset($_GET['__marketmate_health'])) {
     header('Content-Type: application/json');
     $readEnvironment = static function (string $name): string|false {
         $value = getenv($name);
-        if ($value !== false) {
+        if ($value !== false && $value !== '') {
             return $value;
         }
 

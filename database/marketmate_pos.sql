@@ -53,7 +53,7 @@ CREATE TABLE sales (
 CREATE TABLE ci_sessions (
     id VARCHAR(128) NOT NULL PRIMARY KEY,
     ip_address VARCHAR(45) NOT NULL,
-    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    timestamp BIGINT UNSIGNED NOT NULL DEFAULT 0,
     data BLOB NOT NULL,
     KEY ci_sessions_timestamp (timestamp)
 );
