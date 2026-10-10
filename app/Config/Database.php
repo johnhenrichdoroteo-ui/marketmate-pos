@@ -197,9 +197,11 @@ class Database extends Config
         // Vercel runs outside Railway's private network, so prefer Railway's
         // public TCP endpoint when the integration exposes one.
         $databaseUrl = getenv('MYSQL_PUBLIC_URL') ?: getenv('DATABASE_URL') ?: getenv('MYSQL_URL');
+        $hasDatabaseUrl = false;
         if (is_string($databaseUrl) && $databaseUrl !== '') {
             $parts = parse_url($databaseUrl);
             if (is_array($parts) && in_array($parts['scheme'] ?? '', ['mysql', 'mariadb'], true)) {
+                $hasDatabaseUrl = true;
                 $this->default['hostname'] = $parts['host'] ?? $this->default['hostname'];
                 $this->default['username'] = isset($parts['user']) ? urldecode($parts['user']) : $this->default['username'];
                 $this->default['password'] = isset($parts['pass']) ? urldecode($parts['pass']) : $this->default['password'];
@@ -209,11 +211,11 @@ class Database extends Config
         }
 
         $environmentMap = [
-            'hostname' => ['DB_HOST', 'MYSQLHOST'],
-            'username' => ['DB_USERNAME', 'MYSQLUSER'],
-            'password' => ['DB_PASSWORD', 'MYSQLPASSWORD'],
-            'database' => ['DB_DATABASE', 'MYSQLDATABASE'],
-            'port'     => ['DB_PORT', 'MYSQLPORT'],
+            'hostname' => $hasDatabaseUrl ? ['DB_HOST'] : ['DB_HOST', 'MYSQLHOST'],
+            'username' => $hasDatabaseUrl ? ['DB_USERNAME'] : ['DB_USERNAME', 'MYSQLUSER'],
+            'password' => $hasDatabaseUrl ? ['DB_PASSWORD'] : ['DB_PASSWORD', 'MYSQLPASSWORD'],
+            'database' => $hasDatabaseUrl ? ['DB_DATABASE'] : ['DB_DATABASE', 'MYSQLDATABASE'],
+            'port'     => $hasDatabaseUrl ? ['DB_PORT'] : ['DB_PORT', 'MYSQLPORT'],
         ];
         foreach ($environmentMap as $key => $names) {
             foreach ($names as $name) {
